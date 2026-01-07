@@ -1,0 +1,27 @@
+# Python
+*.pyc
+__pycache__/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Data
+data/raw/
+*.csv # All csv files at the root level should be ignored, as they are now in data/processed
+
+# Outputs (moved to results/)
+output_CD_overdensity_SURFGEN/
+output_CD_underdensity_SURFGEN/
+output_EOR_overdensity_SURFGEN/
+Results/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Specific files
+figure10_with_errors.png
+HI_overdense_segment_plot.png
+HI_overdense_segment_plot_linearX.png
