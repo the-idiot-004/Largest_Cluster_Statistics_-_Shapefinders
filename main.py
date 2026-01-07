@@ -1,7 +1,12 @@
 # main.py
 
 import src.config as config
-from src.data_processing import create_control_file, process_subboxes
+from src.data_processing import (
+    create_control_file, 
+    process_subboxes,
+    create_shapefinders_all_small_box_csv,
+    generate_common_redshifts_txt
+)
 from src.analysis import (
     run_sb_analysis, 
     process_shapefinders_for_redshift,
@@ -29,6 +34,12 @@ def main():
     # Process subboxes
     process_subboxes(config.OVERDENSE_BASE_DIR, 'CD_OD1')
     process_subboxes(config.UNDERDENSE_BASE_DIR, 'CD_UD1')
+    
+    # Combine subbox shapefinder data into a single CSV
+    create_shapefinders_all_small_box_csv()
+
+    # Generate common redshifts list from the combined shapefinder data
+    generate_common_redshifts_txt()
 
     # --- 2. Main Analysis ---
     print("\n--- Starting Main Analysis ---")
@@ -38,7 +49,7 @@ def main():
     plot_sb_analysis(sb_analysis_results)
     
     # Process and plot shapefinders for each redshift
-    with open(config.Common_REDSHIFTS_TXT, 'r') as f:
+    with open(config.COMMON_REDSHIFTS_TXT, 'r') as f:
         z_list = [float(l.strip()) for l in f if l.strip()]
         
     for z in z_list:

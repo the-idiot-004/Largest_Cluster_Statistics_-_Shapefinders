@@ -207,6 +207,10 @@ def process_txb_for_redshifts(z_values):
         df_z = df[(df['z'] == z) & (df['vol'] > 0)].copy()
         vol = df_z['vol'].values
 
+        if vol.size == 0:
+            print(f"Warning: No valid data for Txb analysis at z={z}. Skipping.")
+            continue
+
         # Define bins (8 bins)
         edges = bin_edges_for_vol(vol, n_bins=8)
 

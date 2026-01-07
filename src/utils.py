@@ -21,6 +21,10 @@ def loglog_fit(x, y):
     mask = (x > 0) & (y > 0)
     logx = np.log10(x[mask])
     logy = np.log10(y[mask])
+    if len(logx) < 2: # np.polyfit requires at least 2 points for degree 1 fit
+        # Handle cases where there are insufficient valid data points
+        print(f"Warning: Insufficient valid data points ({len(logx)}) for log-log fit. Returning NaN slopes/intercepts.")
+        return np.nan, np.nan, mask
     slope, intercept = np.polyfit(logx, logy, 1)
     return slope, intercept, mask
 

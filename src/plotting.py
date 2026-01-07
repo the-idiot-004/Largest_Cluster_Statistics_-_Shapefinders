@@ -5,6 +5,7 @@ from matplotlib.lines import Line2D
 import pandas as pd
 import numpy as np
 from . import config
+from .utils import ensure_folder
 
 def plot_sb_analysis(analysis_results):
     """
@@ -64,7 +65,7 @@ def plot_sb_analysis(analysis_results):
                                      linestyle=ls, color=color, ecolor=color, zorder=z_order, **plot_params)
 
         # --- Formatting ---
-        ax_top.set_title(f'$FF \approx {ff_target}$', fontsize=16)
+        ax_top.set_title(f'FF ~ {ff_target}', fontsize=16)
         ax_top.set_yscale('log')
         ax_top.set_xscale('log')
         ax_top.set_ylim(1e0, 1e2)
@@ -100,6 +101,11 @@ def plot_shapefinders_for_redshift(data):
     
     z_value = data['z_value']
     vol_mean = data['vol_mean']
+
+    if vol_mean.size == 0:
+        print(f"Warning: No data to plot for shapefinders at z={z_value}. Skipping plot generation.")
+        return
+
     vol_std = data['vol_std']
     T_mean = data['T_mean']
     T_std = data['T_std']

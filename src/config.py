@@ -50,7 +50,8 @@ FIVE_Z_FOR_TXB = [10.11, 13.221, 14.294, 11.09, 9.938]
 # Add any plot-specific configurations here
 plt_style = {
     'font.family': 'serif',
-    'mathtext.fontset': 'dejavuserif',
+    'mathtext.fontset': 'stix', # Changed from dejavuserif
+    'text.usetex': False,      # Explicitly set to False to avoid LaTeX parsing issues
     'xtick.direction': 'in',
     'ytick.direction': 'in',
     'xtick.top': True,

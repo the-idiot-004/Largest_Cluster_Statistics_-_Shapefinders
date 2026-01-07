@@ -139,3 +139,88 @@ def process_subboxes(base_directory, region_prefix, num_subboxes=8):
             df.to_csv(output_filepath, index=False)
             print(f"  - Complete. Saved {len(df)} rows to '{output_filepath}'")
             # --- END OF MODIFICATION ---
+
+def create_shapefinders_all_small_box_csv():
+    """
+    Combines shapefinder data from all sub-boxes into a single CSV.
+    Performs cleaning and recalculates P and F.
+    """
+    print("\n--- Combining and cleaning all sub-box shapefinder data ---")
+    all_dfs = []
+
+    for base_dir, region_prefix in [
+        (config.OVERDENSE_BASE_DIR, 'CD_OD1'),
+        (config.UNDERDENSE_BASE_DIR, 'CD_UD1')
+    ]:
+        for i in range(1, 9): # Assuming 8 subboxes
+            filepath = os.path.join(base_dir, f'subbox{i}', f'{region_prefix}_SF_SB{i}.csv')
+            if os.path.exists(filepath):
+                try:
+                    df = pd.read_csv(filepath)
+                    all_dfs.append(df)
+                except Exception as e:
+                    print(f"Warning: Could not read {filepath}: {e}")
+            else:
+                print(f"Warning: File not found, skipping: {filepath}")
+
+    if not all_dfs:
+        print("No sub-box shapefinder data found to combine.")
+        return
+
+    combined_df = pd.concat(all_dfs, ignore_index=True)
+
+    # Clean the data: remove rows with any negative values in numerical columns
+    # This specifically addresses the cleaning step observed in Spahefinder_stat.ipynb
+    numerical_columns = combined_df.select_dtypes(include=['number']).columns
+    # Ensure 'z' is not accidentally removed if it becomes negative due to some error, though typically redshift is positive.
+    # We are specifically targeting physical quantities that shouldn't be negative.
+    cols_to_check_positive = ['Volume_phys', 'Area_phys', 'Genus', 'IMC_phys', 'L_phys', 'B_phys', 'T_phys']
+    
+    # Filter for columns that are present in the numerical columns and are expected to be positive
+    actual_cols_to_check = [col for col in cols_to_check_positive if col in numerical_columns]
+    
+    # Apply the filter
+    cleaned_df = combined_df[(combined_df[actual_cols_to_check] >= 0).all(axis=1)].copy()
+
+    # Rename columns for consistency with analysis functions
+    cleaned_df = cleaned_df.rename(columns={
+        'redshift': 'z',
+        'Volume_phys': 'vol',
+        'T_phys': 'T',
+        'B_phys': 'B',
+        'L_phys': 'L'
+    })
+
+    # Save the combined and cleaned DataFrame
+    output_filepath = config.SHAPEFINDERS_ALL_SMALL_BOX_CSV
+    os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
+    cleaned_df.to_csv(output_filepath, index=False)
+    print(f"Successfully combined and cleaned {len(cleaned_df)} rows to: {output_filepath}")
+    print(f"Original rows: {len(combined_df)}, Cleaned rows: {len(cleaned_df)}")
+    print("-" * 30)
+    return cleaned_df
+
+def generate_common_redshifts_txt():
+    """
+    Generates a list of common redshifts from the combined shapefinder data
+    and saves them to a text file.
+    """
+    print("\n--- Generating common redshifts list ---")
+    try:
+        df_sf_all = pd.read_csv(config.SHAPEFINDERS_ALL_SMALL_BOX_CSV)
+    except FileNotFoundError:
+        print(f"FATAL ERROR: Combined shapefinder CSV not found at {config.SHAPEFINDERS_ALL_SMALL_BOX_CSV}.")
+        print("Please ensure it's created before generating common redshifts.")
+        return
+
+    # Extract unique, sorted redshifts
+    unique_redshifts = sorted(df_sf_all['z'].unique())
+
+    # Save to file
+    output_filepath = config.COMMON_REDSHIFTS_TXT
+    os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
+    with open(output_filepath, 'w') as f:
+        for z in unique_redshifts:
+            f.write(f"{z}\n")
+    print(f"Successfully generated common redshifts list to: {output_filepath}")
+    print("-" * 30)
