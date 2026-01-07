@@ -23,6 +23,69 @@ The repository is organized as follows:
 -   `docs/`: Contains the project report (`LCS_Report.pdf`).
 
 
+## Simulation and Data Details
+
+### Analysis Methods
+The analysis is performed using two methods:
+1.  **Entire Box Analysis:** Uses the full simulation box. Files ending with `_subbox0` are from this analysis.
+2.  **Sub-box Analysis:** Divides the box into 8 equal and separated cubes. Results from this method are primarily used for error estimation.
+
+### Cosmic Dawn (CD) Analysis
+-   **Temperature Thresholds (TGamma):** Uses `TGamma = fT * 2.725 * (1 + z)` in Kelvin, with `fT` values of 1, 3, 6, and 10.
+-   **Regions:**
+    -   **Emission/Heated Regions (Overdensity):** Gas temperature above `TGamma`. Data is processed from `output_CD_overdensity_SURFGEN/`.
+    -   **Cold/Absorption Regions (Underdensity):** Data is processed from `output_CD_underdensity_SURFGEN/`.
+
+### Epoch of Reionization (EoR) Analysis
+-   **Threshold Value:** Uses a threshold of 0.5 for ionized regions.
+-   **Regions:** Analysis is performed for ionized regions only, from `output_EOR_overdensity_SURFGEN/`.
+
+### Raw Data File Formats (SURFGEN Outputs)
+
+#### `Cluster_stat_copy.z*` files:
+These files contain cluster statistics. The redshift information is part of the filename (the float following `Cluster_stat_copy.z`).
+
+**Quantities in the file (columns):**
+-   `rho_th`: Threshold chosen for the analysis (Float).
+-   `NC`: Total number of clusters (Integer).
+-   `Total_count`: Total volume of the clusters in grid units (Integer).
+-   `NIJK`: Total number of grid points considered (`grid**3`) (Integer).
+-   `FF`: Filling Fraction (Float).
+-   `percolation_no`: Number of different percolated clusters (Integer).
+-   `count_max`: Number of grid points in the largest region (Integer).
+-   `LCS`: Largest Cluster Statistics (Float). Calculated as `count_max / Total_count`.
+-   `NN_max`: (Unknown, Integer).
+-   `count_max_vol`: (Unknown, Float).
+-   `vol_max`: (Unknown, Float).
+-   `NN_max_vol`: (Unknown, Integer).
+-   `vol_max_count`: Equal to `count_max` (Integer).
+
+#### `Shapefinders_copy*` files:
+These files contain shapefinder information. Redshift information is in the filename.
+
+**Quantities in this file (columns):**
+-   `NN`, `Ncount`: (Indices/Counts).
+-   `arr12`: An array-like structure containing various shapefinder components.
+    -   `arr12[0]`: Volume in grid units.
+    -   `arr12[1]`: Area in grid units.
+    -   `arr12[2]`: Isotropic Mean Curvature (IMC).
+    -   `arr12[3]`: Genus.
+
+**Method to estimate L, T, B, P, F (Physical Units):**
+The original raw shapefinder values (`arr12[8]`, `arr12[9]`, `arr12[10]`) are used to derive Length (L), Thickness (T), Breadth (B), Planarity (P), and Filamentarity (F) in physical units, as follows:
+
+1.  Take absolute values of original raw shapefinders:
+    `raw_sf1 = abs(arr12[8])`
+    `raw_sf2 = abs(arr12[9])`
+    `raw_sf3 = abs(arr12[10])`
+2.  Sort them to find T, B, L:
+    `shapefinders = sorted([raw_sf1, raw_sf2, raw_sf3])`
+    `T_grid, B_grid, L_grid = shapefinders[0], shapefinders[1], shapefinders[2]`
+3.  Calculate Planarity (P) and Filamentarity (F):
+    `P = (B_grid - T_grid) / (B_grid + T_grid)` (with small epsilon for division by zero)
+    `F = (L_grid - B_grid) / (L_grid + B_grid)` (with small epsilon for division by zero)
+4.  These are then converted to physical units using `config.CELL_SIZE_MPC_H`.
+
 ## How to Run the Analysis
 
 ### Prerequisites

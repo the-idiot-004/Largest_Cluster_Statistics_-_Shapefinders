@@ -10,7 +10,7 @@ from utils import (
 def extract_and_save_slopes(z_values, out_csv):
     """
     For each z in z_values, compute slopes mT, mB, mL, mP, mF, mG, mTxB
-    and write them to out_csv. Overwrites if it already exists.
+    and write them to out_csv. 
     """
     cols = ['z', 'mT', 'mB', 'mL', 'mP', 'mF', 'mG', 'mTxB']
     results = []
