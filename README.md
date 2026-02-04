@@ -118,4 +118,3 @@ The script will:
 2.  Run all statistical analyses.
 3.  Generate all plots and save them in the `results/plots/` directory.
 
-The final output figures are those referenced in `docs/LCS_Report.pdf`.
