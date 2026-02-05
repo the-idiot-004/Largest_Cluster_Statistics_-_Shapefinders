@@ -35,12 +35,3 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Jupyter Notebook files
-.ipynb_checkpoints/
-.virtual_documents/
-
-# Added by Gemini
-.geminiignore
-.aider.chat.history.md
-.aider.input.history
-/home/amankumar/.gemini/tmp
